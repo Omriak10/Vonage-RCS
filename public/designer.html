@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RCS Message Designer - Vonage</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>Vonage RCS Editor</h1>
+            <p>Design and visualize your RCS messages for Vonage Messages API</p>
+        </header>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Left Panel - Designer -->
+            <div class="designer-panel">
+                <div class="panel-header">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h2>Message Designer</h2>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn-templates" onclick="showHelp()">
+                                ❓ Help
+                            </button>
+                            <button class="btn-templates" onclick="toggleTemplates()" id="templatesToggleBtn">
+                                📋 Templates
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Templates Section (Hidden by default) -->
+                <div id="templatesSection" style="display: none; border-bottom: 1px solid var(--border-color);">
+                    <div style="padding: 20px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <h3 style="font-size: 1rem; font-weight: 600; margin: 0;">My Templates</h3>
+                            <button onclick="toggleTemplates()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #666;">&times;</button>
+                        </div>
+                        
+                        <!-- Search Box -->
+                        <div class="form-group" style="margin-bottom: 15px;">
+                            <input type="text" id="templateSearch" placeholder="Search templates..." onkeyup="filterTemplates()" style="width: 100%; padding: 10px 12px; border: 1px solid var(--border-color); border-radius: 4px;">
+                        </div>
+                        
+                        <!-- Templates List -->
+                        <div id="templatesListDesigner" style="max-height: 400px; overflow-y: auto;">
+                            <!-- Templates will be rendered here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Message Type Selector -->
+                <div class="section">
+                    <label class="section-title">Message Type</label>
+                    <div class="message-type-selector">
+                        <button class="type-btn active" data-type="text">Text</button>
+                        <button class="type-btn" data-type="image">Image</button>
+                        <button class="type-btn" data-type="video">Video</button>
+                        <button class="type-btn" data-type="file">File</button>
+                        <button class="type-btn" data-type="card">Rich Card</button>
+                        <button class="type-btn" data-type="carousel">Carousel</button>
+                    </div>
+                </div>
+
+                <!-- Configuration Status -->
+                <div class="section" style="background: #f5f5f5; border-left: 4px solid #000000;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div style="flex: 1;">
+                            <div style="font-weight: 600; color: #000000; margin-bottom: 5px;">
+                                <span id="configStatus">Configuration Active</span>
+                            </div>
+                            <div style="font-size: 0.85rem; color: #666666;" id="configDetails">
+                                App ID: <span id="displayAppId"></span><br>
+                                RCS Sender: <span id="displaySenderId"></span>
+                            </div>
+                        </div>
+                        <button class="btn btn-secondary" style="width: auto; padding: 8px 16px; margin: 0;" onclick="reconfigure()">
+                            <span>Reconfigure</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Basic Fields -->
+                <div class="section">
+                    <label class="section-title">Recipient Information</label>
+                    <div class="form-group">
+                        <label>To (Phone Number)</label>
+                        <input type="text" id="toNumber" placeholder="447700900000" value="447700900000">
+                        <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px;">
+                            E.164 format without + or 00 (e.g., 447700900000)
+                        </div>
+                    </div>
+                    
+                    <div style="margin: 15px 0; text-align: center; color: var(--text-secondary); font-size: 0.9rem;">
+                        — OR —
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Upload CSV File (Batch Send)</label>
+                        <div class="file-upload" style="min-height: 100px;">
+                            <input type="file" id="csvUpload" accept=".csv" onchange="handleCSVUpload(event)">
+                            <label for="csvUpload" class="file-upload-label">
+                                <div style="font-size: 2rem; margin-bottom: 10px;">📄</div>
+                                <div>Click to upload CSV file</div>
+                                <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 5px;">
+                                    One phone number per row
+                                </div>
+                            </label>
+                        </div>
+                        <div id="csvPreview" style="display: none; margin-top: 10px; padding: 10px; background: #f5f5f5; border-radius: 8px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <div style="font-weight: 600; color: #000000;">
+                                    <span id="csvFileName"></span>
+                                </div>
+                                <button onclick="removeCSV()" style="background: none; border: none; color: #dc2626; cursor: pointer; font-size: 1.2rem; padding: 0;">&times;</button>
+                            </div>
+                            <div style="font-size: 0.85rem; color: #666666;">
+                                <span id="csvPhoneCount">0</span> phone numbers loaded
+                            </div>
+                            <div id="csvPhoneList" style="margin-top: 8px; max-height: 100px; overflow-y: auto; font-size: 0.8rem; color: #666666;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Message Type Specific Fields -->
+                <div id="messageFields">
+                    <!-- Dynamically populated based on message type -->
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="sendMessage()">
+                        <span>Send Message</span>
+                    </button>
+                    <button class="btn btn-secondary" onclick="saveAsTemplate()">
+                        <span>Save as Template</span>
+                    </button>
+                    <button class="btn btn-secondary" onclick="copyJSON()">
+                        <span>Copy JSON</span>
+                    </button>
+                    <button class="btn btn-secondary" onclick="resetForm()">
+                        <span>Reset</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Right Panel - Preview -->
+            <div class="preview-panel">
+                <div class="panel-header">
+                    <h2>Preview</h2>
+                    <div class="preview-tabs">
+                        <button class="preview-tab active" data-tab="preview">Phone</button>
+                        <button class="preview-tab" data-tab="json">JSON Payload</button>
+                    </div>
+                </div>
+
+                <!-- Phone Preview Tab -->
+                <div class="tab-content active" id="previewTab">
+                    <div class="phone-preview-container">
+                        <div class="phone-mockup">
+                            <div class="phone-status-bar">
+                                <div class="time">12:00</div>
+                                <div class="status-icons">
+                                    <span>●●●</span>
+                                </div>
+                            </div>
+                            <div class="chat-header">
+                                <div class="back-btn">←</div>
+                                <div class="contact-info">
+                                    <div class="contact-name" id="previewSender">Vonage</div>
+                                    <div class="contact-status">RCS Message</div>
+                                </div>
+                            </div>
+                            <div class="messages-container" id="messagesContainer">
+                                <div class="message-bubble" id="messagePreview">
+                                    <!-- Message content will be rendered here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- JSON Tab Content -->
+                <div class="tab-content" id="jsonTab">
+                    <div class="json-section">
+                        <pre id="jsonPayload" class="json-display"></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Modal -->
+    <div class="modal" id="helpModal">
+        <div class="modal-content help-modal-content">
+            <div class="modal-header">
+                <h2>RCS Message Designer Help</h2>
+                <button class="modal-close" onclick="closeHelp()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- Help Tabs -->
+                <div class="help-tabs">
+                    <button class="help-tab active" onclick="switchHelpTab('overview')">Overview</button>
+                    <button class="help-tab" onclick="switchHelpTab('types')">Message Types</button>
+                    <button class="help-tab" onclick="switchHelpTab('howto')">How to Use</button>
+                    <button class="help-tab" onclick="switchHelpTab('limits')">RCS Limits</button>
+                </div>
+                
+                <!-- Overview Tab -->
+                <div class="help-content active" id="help-overview">
+                    <h3>What is RCS?</h3>
+                    <p>RCS (Rich Communication Services) is the next generation of SMS messaging. It enables rich media, interactive buttons, carousels, and more - all within the native messaging app.</p>
+                    
+                    <h3>What This Tool Does</h3>
+                    <ul>
+                        <li><strong>Design Messages</strong> - Create text, image, video, file, rich card, and carousel messages</li>
+                        <li><strong>Live Preview</strong> - See exactly how your message will appear on a phone</li>
+                        <li><strong>Send Messages</strong> - Send directly via Vonage Messages API</li>
+                        <li><strong>Save Templates</strong> - Save your designs for reuse</li>
+                        <li><strong>Batch Send</strong> - Upload a CSV to send to multiple recipients</li>
+                        <li><strong>Auto Image Resize</strong> - Images are automatically resized to meet RCS limits</li>
+                    </ul>
+                    
+                    <h3>Quick Start</h3>
+                    <ol>
+                        <li>Configure your Vonage credentials (App ID, Private Key, Sender ID)</li>
+                        <li>Select a message type</li>
+                        <li>Fill in the message content</li>
+                        <li>Preview in the phone mockup</li>
+                        <li>Click "Send Message" to deliver</li>
+                    </ol>
+                </div>
+                
+                <!-- Message Types Tab -->
+                <div class="help-content" id="help-types">
+                    <div class="help-type-card">
+                        <h4>💬 Text Message</h4>
+                        <p>Simple text messages with optional suggestion buttons.</p>
+                        <ul>
+                            <li>Up to 3,072 characters</li>
+                            <li>Add up to 4 suggestion buttons</li>
+                            <li>Best for: Notifications, alerts, simple communications</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="help-type-card">
+                        <h4>🖼️ Image Message</h4>
+                        <p>Send images with optional caption text.</p>
+                        <ul>
+                            <li>Max 2MB file size (auto-resized)</li>
+                            <li>Max 1440×1440 pixels (auto-resized)</li>
+                            <li>Formats: JPEG, PNG</li>
+                            <li>Best for: Product images, promotional content</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="help-type-card">
+                        <h4>🎬 Video Message</h4>
+                        <p>Send videos with optional caption text.</p>
+                        <ul>
+                            <li>Max 100MB file size</li>
+                            <li>Formats: MP4, WebM, M4V</li>
+                            <li>Best for: Tutorials, promotions, demonstrations</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="help-type-card">
+                        <h4>📄 File Message</h4>
+                        <p>Send PDF documents.</p>
+                        <ul>
+                            <li>Max 100MB file size</li>
+                            <li>Format: PDF only</li>
+                            <li>Best for: Documents, receipts, tickets</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="help-type-card">
+                        <h4>🃏 Rich Card</h4>
+                        <p>A visually rich card with image, title, text, and action buttons.</p>
+                        <ul>
+                            <li>Title: Max 200 characters</li>
+                            <li>Description: Max 2,000 characters</li>
+                            <li>Media: Image or video</li>
+                            <li>Up to 4 suggestion buttons</li>
+                            <li>Best for: Product showcases, event invitations, detailed info</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="help-type-card">
+                        <h4>🎠 Carousel</h4>
+                        <p>A horizontally scrollable set of rich cards.</p>
+                        <ul>
+                            <li>2-10 cards per carousel</li>
+                            <li>Each card has title, text, media, and buttons</li>
+                            <li>Card width: Small (180dp) or Medium (296dp)</li>
+                            <li>Best for: Product catalogs, multiple options, galleries</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- How to Use Tab -->
+                <div class="help-content" id="help-howto">
+                    <h3>1. Configure Credentials</h3>
+                    <p>Before sending messages, you need to configure your Vonage credentials:</p>
+                    <ul>
+                        <li><strong>Application ID</strong> - Found in your Vonage Dashboard under Applications</li>
+                        <li><strong>Private Key</strong> - Download the .key file from your Vonage Application</li>
+                        <li><strong>RCS Sender ID</strong> - Your RCS Agent ID from Vonage Dashboard</li>
+                    </ul>
+                    <p>Click "Reconfigure" to update these at any time.</p>
+                    
+                    <h3>2. Design Your Message</h3>
+                    <ol>
+                        <li>Select a message type from the buttons at the top</li>
+                        <li>Fill in the required fields for that message type</li>
+                        <li>Upload any media files (images are auto-resized for RCS)</li>
+                        <li>Add suggestion buttons if desired</li>
+                    </ol>
+                    
+                    <h3>3. Preview Your Message</h3>
+                    <p>The phone mockup on the right shows exactly how your message will appear. Switch to "JSON Payload" to see the raw API payload.</p>
+                    
+                    <h3>4. Save as Template</h3>
+                    <p>Click "Save as Template" to save your current design. Templates include all settings, uploaded media URLs, and payload data.</p>
+                    
+                    <h3>5. Send Messages</h3>
+                    <p><strong>Single Send:</strong> Enter a phone number and click "Send Message".</p>
+                    <p><strong>Batch Send:</strong> Upload a CSV file with one phone number per row, then click "Send Message" to send to all recipients.</p>
+                    
+                    <h3>6. Suggestion Button Types</h3>
+                    <table class="help-table">
+                        <tr><th>Type</th><th>Description</th></tr>
+                        <tr><td>Text Reply</td><td>Sends a text response when tapped</td></tr>
+                        <tr><td>Open URL</td><td>Opens a web link</td></tr>
+                        <tr><td>Dial Number</td><td>Opens phone dialer with number</td></tr>
+                        <tr><td>View Location</td><td>Opens map at specified coordinates</td></tr>
+                        <tr><td>Share Location</td><td>Prompts user to share their location</td></tr>
+                        <tr><td>Calendar Event</td><td>Creates a calendar event</td></tr>
+                    </table>
+                </div>
+                
+                <!-- RCS Limits Tab -->
+                <div class="help-content" id="help-limits">
+                    <h3>Text Limits</h3>
+                    <table class="help-table">
+                        <tr><th>Element</th><th>Limit</th></tr>
+                        <tr><td>Text message</td><td>3,072 characters</td></tr>
+                        <tr><td>Card title</td><td>200 characters</td></tr>
+                        <tr><td>Card description</td><td>2,000 characters</td></tr>
+                        <tr><td>Button text</td><td>25 characters</td></tr>
+                        <tr><td>Postback data</td><td>2,048 characters</td></tr>
+                    </table>
+                    
+                    <h3>Image Requirements</h3>
+                    <table class="help-table">
+                        <tr><th>Property</th><th>Requirement</th></tr>
+                        <tr><td>Max file size</td><td>2 MB</td></tr>
+                        <tr><td>Max dimensions</td><td>1440 × 1440 pixels</td></tr>
+                        <tr><td>Formats</td><td>JPEG, PNG</td></tr>
+                    </table>
+                    <p style="color: var(--success-color); font-weight: 500;">✅ Images are automatically resized to meet these requirements</p>
+                    
+                    <h3>Video Requirements</h3>
+                    <table class="help-table">
+                        <tr><th>Property</th><th>Requirement</th></tr>
+                        <tr><td>Max file size</td><td>100 MB</td></tr>
+                        <tr><td>Formats</td><td>MP4, WebM, M4V</td></tr>
+                        <tr><td>Duration</td><td>Up to 60 seconds recommended</td></tr>
+                    </table>
+                    
+                    <h3>File Requirements</h3>
+                    <table class="help-table">
+                        <tr><th>Property</th><th>Requirement</th></tr>
+                        <tr><td>Max file size</td><td>100 MB</td></tr>
+                        <tr><td>Format</td><td>PDF only</td></tr>
+                    </table>
+                    
+                    <h3>Structural Limits</h3>
+                    <table class="help-table">
+                        <tr><th>Element</th><th>Limit</th></tr>
+                        <tr><td>Suggestions per message/card</td><td>4 buttons</td></tr>
+                        <tr><td>Cards per carousel</td><td>2-10 cards</td></tr>
+                        <tr><td>Media height options</td><td>Short (112dp), Medium (168dp), Tall (264dp)</td></tr>
+                    </table>
+                    
+                    <h3>Phone Number Format</h3>
+                    <p>Use E.164 format <strong>without</strong> the leading + or 00:</p>
+                    <ul>
+                        <li>✅ Correct: <code>447700900000</code></li>
+                        <li>❌ Wrong: <code>+447700900000</code></li>
+                        <li>❌ Wrong: <code>07700900000</code></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>

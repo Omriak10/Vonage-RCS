@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setup - RCS Message Designer</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .setup-container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 40px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: var(--shadow-lg);
+        }
+        .setup-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .setup-header h1 {
+            color: var(--primary-color);
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        .setup-header p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+        .setup-step {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: var(--bg-color);
+            border-radius: 8px;
+        }
+        .step-number {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .step-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        .file-upload-box {
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+        .file-upload-box:hover {
+            border-color: var(--primary-color);
+            background: #f0f4ff;
+        }
+        .file-upload-box.has-file {
+            border-color: var(--success-color);
+            background: #f0fdf4;
+        }
+        .key-icon {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+        .file-name {
+            font-weight: 600;
+            color: var(--success-color);
+            margin-top: 10px;
+        }
+        .setup-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        .status-message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+        }
+        .status-message.success {
+            background: #f0fdf4;
+            color: #166534;
+            border: 1px solid #22c55e;
+            display: block;
+        }
+        .status-message.error {
+            background: #fef2f2;
+            color: #991b1b;
+            border: 1px solid #ef4444;
+            display: block;
+        }
+        .info-box {
+            background: #eff6ff;
+            border-left: 4px solid var(--primary-color);
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🔧 Setup Configuration</h1>
+            <p>Configure your Vonage credentials to start designing RCS messages</p>
+        </header>
+
+        <div class="setup-container">
+            <div class="setup-header">
+                <h1>🔑 Vonage API Setup</h1>
+                <p>Before you can send RCS messages, we need your Vonage application credentials</p>
+            </div>
+
+            <div class="setup-step">
+                <div class="step-title">
+                    <span class="step-number">1</span>
+                    <span>Upload Private Key</span>
+                </div>
+                <p style="margin-bottom: 15px; color: var(--text-secondary); font-size: 0.9rem;">
+                    Upload your private.key file downloaded from Vonage Dashboard
+                </p>
+                
+                <input type="file" id="privateKeyInput" accept=".key,.txt,.pem" style="display: none;" onchange="handlePrivateKeyUpload(event)">
+                <div class="file-upload-box" id="keyUploadBox" onclick="document.getElementById('privateKeyInput').click()">
+                    <div class="key-icon">🔐</div>
+                    <div><strong>Click to upload private.key</strong></div>
+                    <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 5px;">
+                        or drag and drop
+                    </div>
+                </div>
+                <div id="keyFileName" class="file-name" style="display: none;"></div>
+
+                <div class="info-box">
+                    <strong>💡 Where to get this:</strong><br>
+                    Go to <a href="https://dashboard.nexmo.com/applications" target="_blank">Vonage Dashboard</a> → 
+                    Your Application → Generate new key pair → Download private.key
+                </div>
+            </div>
+
+            <div class="setup-step">
+                <div class="step-title">
+                    <span class="step-number">2</span>
+                    <span>Enter Application ID</span>
+                </div>
+                <p style="margin-bottom: 15px; color: var(--text-secondary); font-size: 0.9rem;">
+                    Your Vonage Application ID from the dashboard
+                </p>
+                
+                <div class="form-group">
+                    <input type="text" id="applicationId" placeholder="e.g., 12345678-1234-1234-1234-123456789abc" style="font-family: monospace;">
+                </div>
+
+                <div class="info-box">
+                    <strong>💡 Where to find this:</strong><br>
+                    Go to <a href="https://dashboard.nexmo.com/applications" target="_blank">Vonage Dashboard</a> → 
+                    Your Application → Copy the Application ID
+                </div>
+            </div>
+
+            <div class="setup-step">
+                <div class="step-title">
+                    <span class="step-number">3</span>
+                    <span>Enter RCS Sender ID</span>
+                </div>
+                <p style="margin-bottom: 15px; color: var(--text-secondary); font-size: 0.9rem;">
+                    Your RCS External Account ID (e.g., "Username")
+                </p>
+                
+                <div class="form-group">
+                    <input type="text" id="rcsSenderId" placeholder="e.g., Username" value="">
+                </div>
+
+                <div class="info-box">
+                    <strong>💡 Where to find this:</strong><br>
+                    Go to <a href="https://dashboard.nexmo.com/messages/rcs" target="_blank">Vonage Dashboard</a> → 
+                    Messaging → RCS Agent Builder → The ID will appear on your RCS Agent
+                </div>
+            </div>
+
+            <div id="statusMessage" class="status-message"></div>
+
+            <div class="setup-actions">
+                <button class="btn btn-primary" style="flex: 1;" onclick="saveConfiguration()">
+                    <span>Save & Continue</span>
+                </button>
+            </div>
+
+            <div style="margin-top: 20px; padding: 15px; background: #f5f5f5; border-radius: 0; font-size: 0.85rem; border: 1px solid #e5e5e5;">
+                <strong>Privacy Note:</strong> Your private key is stored locally in your browser and never sent to any server except Vonage's API.
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+        let privateKeyContent = null;
+
+        function handlePrivateKeyUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                privateKeyContent = e.target.result;
+                
+                // Update UI
+                document.getElementById('keyUploadBox').classList.add('has-file');
+                document.getElementById('keyFileName').style.display = 'block';
+                document.getElementById('keyFileName').textContent = file.name + ' uploaded successfully';
+                
+                showToast('Private key loaded successfully!', 'success');
+            };
+            
+            reader.onerror = function() {
+                showToast('Error reading file. Please try again.', 'error');
+            };
+            
+            reader.readAsText(file);
+        }
+
+        function saveConfiguration() {
+            const appId = document.getElementById('applicationId').value.trim();
+            const senderId = document.getElementById('rcsSenderId').value.trim();
+            
+            // Validation
+            if (!privateKeyContent) {
+                showToast('Please upload your private key file', 'error');
+                return;
+            }
+            
+            if (!appId) {
+                showToast('Please enter your Application ID', 'error');
+                return;
+            }
+
+            if (!senderId) {
+                showToast('Please enter your RCS Sender ID', 'error');
+                return;
+            }
+
+            // Save to localStorage
+            try {
+                localStorage.setItem('vonage_private_key', privateKeyContent);
+                localStorage.setItem('vonage_app_id', appId);
+                localStorage.setItem('vonage_rcs_sender_id', senderId);
+                localStorage.setItem('vonage_setup_complete', 'true');
+                
+                showStatusMessage('Configuration saved successfully! Redirecting...', 'success');
+                
+                // Redirect to main designer
+                setTimeout(() => {
+                    window.location.href = 'designer.html';
+                }, 1500);
+            } catch (error) {
+                showToast('Error saving configuration: ' + error.message, 'error');
+            }
+        }
+
+        function showStatusMessage(message, type) {
+            const statusEl = document.getElementById('statusMessage');
+            statusEl.textContent = message;
+            statusEl.className = 'status-message ' + type;
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast show ' + type;
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Check if already configured
+        window.onload = function() {
+            if (localStorage.getItem('vonage_setup_complete')) {
+                if (confirm('Configuration already exists. Go to designer?')) {
+                    window.location.href = 'designer.html';
+                }
+            }
+        };
+    </script>
+</body>
+</html>

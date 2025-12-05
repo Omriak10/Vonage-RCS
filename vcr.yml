@@ -1,0 +1,25 @@
+project:
+    name: rcs-editor
+instance:
+    name: production
+    runtime: nodejs22
+    region: aws.euw1
+    application-id: YOUR_APP_ID_HERE
+    entrypoint: [node, server.js]
+    capabilities:
+        - messages-v1
+    environment:
+        - name: VONAGE_API_KEY
+          value: "YOUR_API_KEY_HERE"
+        - name: VONAGE_API_SECRET
+          value: "YOUR_API_SECRET_HERE"
+debug:
+    name: debug
+    application-id: YOUR_APP_ID_HERE
+    entrypoint: [nodemon, --inspect, server.js]
+    environment:
+        - name: VONAGE_API_KEY
+          value: "YOUR_API_KEY_HERE"
+        - name: VONAGE_API_SECRET
+          value: "YOUR_API_SECRET_HERE"
+    preserve-data: false
