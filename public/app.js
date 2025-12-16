@@ -849,7 +849,7 @@ function getSuggestions(containerId) {
         if (type === 'open_url') {
             const url = urlInput.value.trim();
             if (!url || (!url.startsWith('http://') && !url.startsWith('https://'))) return;
-            suggestions.push({ type, text, postback_data: postback, url });
+            suggestions.push({ type, text, postback_data: postback, url, description: text });
         } else if (type === 'dial') {
             const phone = phoneInput.value.trim();
             const fallback = fallbackInput.value.trim();
@@ -864,7 +864,7 @@ function getSuggestions(containerId) {
             const fallback = fallbackInput.value.trim();
             if (!latitude || !longitude) return;
             const suggestion = { type, text, postback_data: postback, latitude, longitude };
-            if (pinlabel) suggestion.label = pinlabel;
+            if (pinlabel) suggestion.pin_label = pinlabel;
             if (fallback) suggestion.fallback_url = fallback;
             suggestions.push(suggestion);
         } else if (type === 'share_location') {
